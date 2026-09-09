@@ -26,8 +26,10 @@ package was written to end.
 from __future__ import annotations
 
 import logging
+import os
 import socket
 import sys
+from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from typing import Any, Dict, Optional
 
@@ -292,3 +294,81 @@ class ClientMonitor:
         if "success" not in body:
             body["success"] = response.status_code in (200, 201)
         return Response(body)
+
+
+# ---------------------------------------------------------------------------
+# Rotating logs
+#
+# Every script that vendored this client also hand-rolled its own
+# `logging.basicConfig(handlers=[FileHandler(...), StreamHandler(...)])`. A
+# plain FileHandler never rotates: those logs grow until checkDisk - which
+# reports through this same API - complains about the partition they are on.
+# It lives in this file rather than a module of its own so that the single
+# vendored copy carries everything a script needs.
+# ---------------------------------------------------------------------------
+
+#: 5 MB a file, 5 old files kept: at most 30 MB per log, which is small next to
+#: anything on these machines and long enough to cover a week of cron runs.
+DEFAULT_MAX_BYTES = 5 * 1024 * 1024
+DEFAULT_BACKUP_COUNT = 5
+
+DEFAULT_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s"
+
+
+def setup_rotating_logger(
+    path: str,
+    name: Optional[str] = None,
+    level: int = logging.INFO,
+    max_bytes: int = DEFAULT_MAX_BYTES,
+    backup_count: int = DEFAULT_BACKUP_COUNT,
+    to_stream: bool = True,
+    stream=None,
+    fmt: str = DEFAULT_FORMAT,
+) -> logging.Logger:
+    """Configure and return a logger that writes to a size-rotated file.
+
+    Args:
+        path: Log file. Its directory is created if missing.
+        name: Logger name. `None` - the default - configures the root logger,
+            which is what a script replacing `logging.basicConfig` wants, and
+            what makes this package's own messages land in the same file.
+        level: Threshold for both handlers.
+        max_bytes: Rotate once the file passes this size.
+        backup_count: How many rotated files to keep.
+        to_stream: Also log to a stream, so cron mail and `journalctl` still
+            show the run. Every setup this replaces did this; keep it.
+        stream: Which stream. `None` means stderr, the logging default; pass
+            `sys.stdout` where the script it replaces used stdout.
+        fmt: Format string.
+
+    Calling it twice for the same logger replaces the handlers rather than
+    adding a second set, so a script that is imported as well as run does not
+    log everything twice.
+    """
+    directory = os.path.dirname(os.path.abspath(path))
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+
+    for handler in list(logger.handlers):
+        logger.removeHandler(handler)
+        handler.close()
+
+    formatter = logging.Formatter(fmt)
+
+    file_handler = RotatingFileHandler(
+        path, maxBytes=max_bytes, backupCount=backup_count, encoding="utf-8"
+    )
+    file_handler.setLevel(level)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    if to_stream:
+        stream_handler = logging.StreamHandler(stream)
+        stream_handler.setLevel(level)
+        stream_handler.setFormatter(formatter)
+        logger.addHandler(stream_handler)
+
+    return logger

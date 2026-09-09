@@ -85,10 +85,16 @@ from signlab_client_monitor import setup_rotating_logger
 setup_rotating_logger("/home/gomer/viconSync/logs/sync.log")
 ```
 
-5 MB per file, 5 files kept, still echoed to stdout so cron mail and
+5 MB per file, 5 files kept, still echoed to the console so cron mail and
 `journalctl` are unchanged. Configuring the root logger this way also captures
 the heartbeat client's own messages, so a failed heartbeat is in the same file
 as the run that failed.
+
+It lives in `client.py` rather than in a module of its own, and `logs.py` is
+only a re-export. That is because `client.py` is what gets vendored as a single
+file onto hosts that cannot install the package, and a script that needs a
+heartbeat generally needs a log file too - splitting them would mean vendoring
+two files and getting one of them wrong.
 
 ## Installing it
 
