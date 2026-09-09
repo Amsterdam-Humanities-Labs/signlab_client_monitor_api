@@ -23,33 +23,32 @@ cd /web/client_monitor_api/examples
 ```
 
 ### 2. Python Script (`python_client.py`)
-Python class-based implementation with comprehensive error handling.
 
-**Quick Start:**
+**This file is no longer an example.** It is a verbatim vendored copy of
+`client/signlab_client_monitor/client.py`, kept here so that a host which has
+not installed the package can still do `from python_client import
+ClientMonitor`. Do not edit it; edit the package and copy it back. The
+packaged form is what new code should use:
+
 ```python
-from python_client import ClientMonitor
+from signlab_client_monitor import ClientMonitor
 
 monitor = ClientMonitor(
-    api_url="http://localhost/client_monitor_api/api.php",
     client_id="my-script",
-    client_name="My Script"
+    client_name="My Script",
+    heartbeat_interval=3600,
 )
 
 # Do your work...
 
-monitor.send_heartbeat()
+monitor.send_heartbeat_with_stats("success", "done", {"files": 42})
 ```
 
-**Run the example:**
-```bash
-cd /web/client_monitor_api/examples
-python3 python_client.py
-```
+Install it with `client/install.sh`. It registers itself before the first
+heartbeat, sets a timeout, and cannot raise into the script it monitors - see
+`client/README.md` for why those three properties are the point.
 
-**Requirements:**
-```bash
-pip install requests
-```
+Running it directly no longer does anything: it is a module, not a demo.
 
 ### 3. PHP Script (`php_client.php`)
 PHP class with full API integration and multiple usage patterns.

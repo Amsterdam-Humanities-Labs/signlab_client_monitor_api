@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "signlab-client-monitor"
+version = "1.0.0"
+description = "Client for the SignCollect client monitor API: register, heartbeat, report status and metrics"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{ name = "gotterspeer" }]
+dependencies = ["requests>=2.25"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "responses>=0.23"]
+
+[tool.setuptools]
+packages = ["signlab_client_monitor"]
+py-modules = ["python_client"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

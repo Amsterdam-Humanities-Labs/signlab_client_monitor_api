@@ -13,9 +13,16 @@ import logging
 import psutil
 from datetime import datetime
 
-# Add parent directory to path to import ClientMonitor
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from examples.python_client import ClientMonitor
+# The packaged client, from ../client. The fallback is the example module this
+# used to import through a sys.path hack, and it is here because the package
+# has to be installed on the host and a `git pull` alone does not install it -
+# see client/README.md. Once client/install.sh has run on a host, the first
+# branch is what runs.
+try:
+    from signlab_client_monitor import ClientMonitor
+except ImportError:
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from examples.python_client import ClientMonitor
 
 # Configuration
 API_URL = "https://signcollect.nl/client_monitor_api/api.php"
@@ -94,30 +101,20 @@ class MetricsCollector:
             return None
 
     def submit_metrics(self, metrics):
-        """Submit metrics to API"""
-        import requests
+        """Submit metrics to API.
 
-        try:
-            url = f"{self.client_monitor.api_url}?action=submit_metrics"
-            payload = {
-                'client_id': self.client_id,
-                'metrics': metrics
-            }
+        This used to POST with raw `requests`, borrowing the client's api_url,
+        because no copy of ClientMonitor had a submit_metrics method. The
+        package has one, and it already sets a timeout and cannot raise.
+        """
+        result = self.client_monitor.submit_metrics(metrics)
+        if result:
+            metrics_id = (result.get('data') or {}).get('metrics_id')
+            logger.info(f"Metrics submitted successfully (ID: {metrics_id})")
+            return True
 
-            response = requests.post(url, json=payload, timeout=10)
-            response.raise_for_status()
-
-            result = response.json()
-            if result.get('success'):
-                logger.info(f"Metrics submitted successfully (ID: {result['data']['metrics_id']})")
-                return True
-            else:
-                logger.error(f"API returned error: {result.get('errors')}")
-                return False
-
-        except Exception as e:
-            logger.error(f"Error submitting metrics: {e}")
-            return False
+        logger.error(f"Metrics submission failed: {result.get('errors')}")
+        return False
 
     def run(self):
         """Main loop: collect and submit metrics every hour"""

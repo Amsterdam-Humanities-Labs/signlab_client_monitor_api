@@ -46,9 +46,29 @@ All responses are JSON of the shape `{success, data, errors}`.
 The long-form request/response reference, with worked `curl` examples and
 client snippets in three languages, lives in the README of
 [`signlab_client_monitor_dashboard`](https://github.com/Amsterdam-Humanities-Labs/signlab_client_monitor_dashboard),
-which documents the two halves as one system. `examples/` here holds runnable
-clients: `python_client.py` (a `ClientMonitor` class), `php_client.php` and
-`bash_client.sh`.
+which documents the two halves as one system. `examples/` here holds a PHP and
+a bash client; the Python one has moved (see below).
+
+## The Python client
+
+`client/` is an installable package, `signlab-client-monitor`, holding the
+`ClientMonitor` class that the monitored scripts import. It lives here rather
+than in a repository of its own because it is not a deployable - it is the
+other end of this API's wire protocol, and versioning the two together is the
+only way they cannot drift apart. That drift is not hypothetical: the class
+existed in six different versions across nine files, reached from eight call
+sites by `sys.path.insert(0, '/home/gomer/pythonCron')`, and the same two fixes
+- a request timeout, and not letting a monitoring failure kill the monitored
+job - had been reinvented four times. `client/README.md` has the table.
+
+```bash
+client/install.sh          # pip where pip works, a plain copy where it does not
+```
+
+`examples/python_client.py` is now a verbatim vendored copy of the package's
+`client.py`, kept so that a host which has never run the installer can still
+import it. Nothing here needs a build step, and nothing breaks if the installer
+is never run.
 
 **There is no authentication.** Any caller that can reach `api.php` can
 register, heartbeat, update or delete any client. That is a known property, not
@@ -91,9 +111,14 @@ install the collector unit:
 mysql admin_gebarenoverleg < migrations/001_create_client_monitors_table.sql
 mysql admin_gebarenoverleg < migrations/002_create_metrics_table.sql
 
+client/install.sh          # the ClientMonitor package the collector imports
 sudo install -m 644 services/client-monitor-metrics.service /etc/systemd/system/
 sudo systemctl daemon-reload && sudo systemctl enable --now client-monitor-metrics
 ```
+
+`client/install.sh` is optional for the collector - it falls back to the
+vendored `examples/python_client.py` if the package is absent - but it is what
+lets every other script on the host drop its `sys.path` hack.
 
 `002` also creates a MySQL `EVENT` that deletes metrics older than seven days,
 so it needs the event scheduler enabled. `services/metrics_collector.py`
