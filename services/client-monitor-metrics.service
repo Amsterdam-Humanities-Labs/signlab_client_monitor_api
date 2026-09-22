@@ -17,9 +17,10 @@ Restart=always
 RestartSec=60
 StartLimitBurst=5
 
-# Logging
-StandardOutput=append:/var/log/client_monitor_metrics.log
-StandardError=append:/var/log/client_monitor_metrics_error.log
+# Logging: the journal (journalctl -u client-monitor-metrics), which rotates
+# itself. The old append: files in /var/log grew forever and nothing read them.
+StandardOutput=journal
+StandardError=journal
 
 # Environment
 Environment="PYTHONUNBUFFERED=1"
