@@ -19,7 +19,10 @@ except Exception as exc:
 - `register()` runs once by itself before the first heartbeat.
 - Nothing raises; every call has a timeout. Methods return a `Response` dict that is falsy on failure.
 - `from python_client import ClientMonitor` also resolves to this package, so the old `sys.path` call sites keep working.
-- `logs.py` only re-exports `setup_rotating_logger` from `client.py`, so `client.py` can be vendored as one file.
+- `logs.py`, `checks.py`, `alert.py` only re-export from `client.py`, so `client.py` can be vendored as one file.
+- `disk_usage(path)`: bytes as `df -B1`, plus `free_percent` and `used_percent` (psutil's `percent`, unrounded). Raises if the path is unreadable.
+- `mount_responds(path)` (`ls` with a 5 s timeout) and `mount_read_write(mount, test_dir)` (write, read back, delete; raises).
+- `send_alert(title, msg, level, channels=("discord", "mailjet"))`: credentials only from the environment (`DISCORD_WEBHOOK_URL` or `DISCORD_BOT_TOKEN` + `DISCORD_CHANNEL_ID`; `MAILJET_API_KEY` + `MAILJET_SECRET_KEY`, addresses as arguments or `ALERT_EMAIL_FROM`/`ALERT_EMAIL_TO`). Unconfigured channels are skipped; never raises.
 
 ## Install
 ```bash

@@ -19,7 +19,14 @@ from signlab_client_monitor.client import (  # noqa: F401
     DEFAULT_TIMEOUT,
     ClientMonitor,
     Response,
+    disk_usage,
+    mount_read_write,
+    mount_responds,
+    send_alert,
+    setup_rotating_logger,
 )
 
 __all__ = ["ClientMonitor", "Response", "DEFAULT_API_URL",
-           "DEFAULT_HEARTBEAT_INTERVAL", "DEFAULT_TIMEOUT"]
+           "DEFAULT_HEARTBEAT_INTERVAL", "DEFAULT_TIMEOUT", "disk_usage",
+           "mount_responds", "mount_read_write", "send_alert",
+           "setup_rotating_logger"]
