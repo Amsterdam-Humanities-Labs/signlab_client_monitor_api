@@ -6,7 +6,7 @@ Registration and heartbeat API for SignCollect scripts and services, plus the `s
 - Clients can also submit metrics (CPU, I/O wait, disk, memory), kept 7 days and charted by the dashboard.
 - `api.php?action=<name>` routes; POST bodies are JSON; `src/ClientMonitorService.php` holds the logic (prepared statements). Responses: `{success, data, errors}`.
 - `client/` is the installable `signlab-client-monitor` package (`ClientMonitor`, `setup_rotating_logger`). See `client/README.md`.
-- No authentication: anyone who can reach `api.php` can register, update or delete any client ([stack#31](https://github.com/Amsterdam-Humanities-Labs/signlab_signcollect-stack/issues/31)).
+- Auth ([stack#31](https://github.com/Amsterdam-Humanities-Labs/signlab_signcollect-stack/issues/31)): `register`, `heartbeat`, `submit_metrics` are open (machine clients). All other actions need the client monitor dashboard's login (PHP session) and answer 401 without it.
 
 | Action | Method | Params |
 |---|---|---|
