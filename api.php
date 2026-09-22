@@ -18,6 +18,14 @@
 require_once __DIR__ . '/src/config.php';
 require_once __DIR__ . '/src/ClientMonitorService.php';
 
+// register, heartbeat and submit_metrics are posted by scripts on many
+// machines and stay open. Every other action - the reads, update_client and
+// delete_client - is only called by signlab_client_monitor_dashboard's
+// js/dashboard.js, so it needs that dashboard's login (its index.php session).
+if (!in_array($_GET['action'] ?? '', ['register', 'heartbeat', 'submit_metrics'], true)) {
+    requireDashboardLogin();
+}
+
 try {
     // Get database connection
     $conn = getDbConnection();
@@ -254,4 +262,17 @@ function handleGetMetrics($service) {
 
     $result = $service->getMetrics($clientId, $hours);
     sendSuccess($result, 200);
+}
+
+/**
+ * 401 unless the caller is logged in to the client monitor dashboard.
+ * gc_maxlifetime matches the dashboard's: a request that ran session GC with
+ * PHP's 24-minute default would expire its 1-year sessions.
+ */
+function requireDashboardLogin() {
+    ini_set('session.gc_maxlifetime', 365 * 24 * 60 * 60);
+    session_start(['read_and_close' => true]);
+    if (($_SESSION['logged_in'] ?? false) !== true) {
+        sendError('Not logged in to the client monitor dashboard', 401);
+    }
 }
