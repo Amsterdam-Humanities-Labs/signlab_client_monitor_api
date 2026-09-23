@@ -16,6 +16,8 @@ from .client import (
     ClientMonitor,
     Response,
 )
+from .checks import disk_usage, mount_read_write, mount_responds
+from .alert import send_alert
 from .logs import (
     DEFAULT_BACKUP_COUNT,
     DEFAULT_MAX_BYTES,
@@ -31,6 +33,10 @@ __all__ = [
     "setup_rotating_logger",
     "DEFAULT_MAX_BYTES",
     "DEFAULT_BACKUP_COUNT",
+    "disk_usage",
+    "mount_responds",
+    "mount_read_write",
+    "send_alert",
 ]
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"

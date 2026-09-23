@@ -50,28 +50,14 @@ heartbeat, sets a timeout, and cannot raise into the script it monitors - see
 
 Running it directly no longer does anything: it is a module, not a demo.
 
-### 3. PHP Script (`php_client.php`)
-PHP class with full API integration and multiple usage patterns.
-
-**Quick Start:**
+### 3. PHP
+The one PHP client in use is `php_client.php` in
+[signlab_pythonCron](https://github.com/Amsterdam-Humanities-Labs/signlab_pythonCron),
+required by its `mysql_backup.php`:
 ```php
-require_once 'php_client.php';
-
-$monitor = new ClientMonitor(
-    'http://localhost/client_monitor_api/api.php',
-    'my-script',
-    'My Script'
-);
-
-// Do your work...
-
-$monitor->sendHeartbeat();
-```
-
-**Run the example:**
-```bash
-cd /web/client_monitor_api/examples
-php php_client.php
+require_once __DIR__ . '/php_client.php';
+$monitor = new ClientMonitor('my-script', 'My Script', 'What it does', 3600);  // registers itself
+$monitor->sendHeartbeatWithStats('success', 'done', ['records' => 42]);
 ```
 
 ## Common Usage Patterns
@@ -185,9 +171,6 @@ cd /web/client_monitor_api/examples
 
 # Test Python
 python3 python_client.py
-
-# Test PHP
-php php_client.php
 ```
 
 After running, check the dashboard to see your test clients!

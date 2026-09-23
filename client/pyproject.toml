@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "signlab-client-monitor"
-version = "1.0.0"
+version = "1.1.0"
 description = "Client for the SignCollect client monitor API: register, heartbeat, report status and metrics"
 readme = "README.md"
 requires-python = ">=3.8"

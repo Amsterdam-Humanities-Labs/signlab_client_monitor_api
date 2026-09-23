@@ -37,7 +37,7 @@ Not deployed by `interface_deploy`; TODO: document how production gets updated (
 ## Configuration
 - `src/config.php`: not in git, no example. Defines the DB connection and `getDbConnection()`, `sendSuccess()`, `sendError()`.
 - `services/metrics_collector.py`: `API_URL` hardcoded to production; needs `psutil`; reports as `server-<primary IP>` hourly. Falls back to `examples/python_client.py` (a byte copy of the package client) when the package is not installed.
-- `examples/`: PHP and bash clients. A single shared PHP client is planned under `client/` ([stack#37](https://github.com/Amsterdam-Humanities-Labs/signlab_signcollect-stack/issues/37)).
+- `examples/`: bash client. The PHP client in use is `php_client.php` in signlab_pythonCron (`mysql_backup.php`).
 
 ## Dependencies
 - MySQL `admin_gebarenoverleg`: `client_monitors`, `client_metrics`.
