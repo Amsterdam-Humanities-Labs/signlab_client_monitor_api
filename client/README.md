@@ -1,6 +1,5 @@
 # signlab-client-monitor
-
-The client half of the client monitor: what a script imports to heartbeat to `api.php` one directory up.
+The client side of the client monitor. A script imports it to send heartbeats to `api.php` in the parent folder.
 
 ```python
 from signlab_client_monitor import ClientMonitor, setup_rotating_logger
@@ -14,15 +13,15 @@ except Exception as exc:
     monitor.send_heartbeat_with_stats("error", f"failed: {exc}")
 ```
 
-## Behaviour (pinned by `tests/`)
-- Signature `(api_url, client_id, client_name, description, heartbeat_interval)`; `api_url` may be omitted and defaults to production.
-- `register()` runs once by itself before the first heartbeat.
-- Nothing raises; every call has a timeout. Methods return a `Response` dict that is falsy on failure.
-- `from python_client import ClientMonitor` also resolves to this package, so the old `sys.path` call sites keep working.
-- `logs.py`, `checks.py`, `alert.py` only re-export from `client.py`, so `client.py` can be vendored as one file.
-- `disk_usage(path)`: bytes as `df -B1`, plus `free_percent` and `used_percent` (psutil's `percent`, unrounded). Raises if the path is unreadable.
-- `mount_responds(path)` (`ls` with a 5 s timeout) and `mount_read_write(mount, test_dir)` (write, read back, delete; raises).
-- `send_alert(title, msg, level, channels=("discord", "mailjet"))`: credentials only from the environment (`DISCORD_WEBHOOK_URL` or `DISCORD_BOT_TOKEN` + `DISCORD_CHANNEL_ID`; `MAILJET_API_KEY` + `MAILJET_SECRET_KEY`, addresses as arguments or `ALERT_EMAIL_FROM`/`ALERT_EMAIL_TO`). Unconfigured channels are skipped; never raises.
+## Behaviour (fixed by `tests/`)
+- Signature: `(api_url, client_id, client_name, description, heartbeat_interval)`. Without `api_url` it uses the core server.
+- `register()` runs once, by itself, before the first heartbeat.
+- No call raises, and every call has a timeout. Without `requests` installed it still imports; sends then only log a warning. Methods return a `Response` dict that is falsy on failure.
+- `from python_client import ClientMonitor` also resolves to this package, so old `sys.path` call sites keep working.
+- `logs.py`, `checks.py` and `alert.py` only re-export from `client.py`. That way `client.py` can be vendored as one file.
+- `disk_usage(path)` returns bytes as `df -B1` does, plus `free_percent` and `used_percent` (psutil's `percent`, not rounded). It raises if the path is unreadable.
+- `mount_responds(path)` runs `ls` with a 5 s timeout. `mount_read_write(mount, test_dir)` writes, reads back and deletes a file; it raises on failure.
+- `send_alert(title, msg, level, channels=("discord", "mailjet"))` reads credentials only from the environment: `DISCORD_WEBHOOK_URL`, or `DISCORD_BOT_TOKEN` + `DISCORD_CHANNEL_ID`; `MAILJET_API_KEY` + `MAILJET_SECRET_KEY`. Addresses come as arguments or from `ALERT_EMAIL_FROM`/`ALERT_EMAIL_TO`. It skips unconfigured channels and never raises.
 
 ## Install
 ```bash
@@ -30,7 +29,7 @@ client/install.sh    # pip --user --break-system-packages, or a plain copy into 
 pip install --user --break-system-packages \
   "git+https://github.com/Amsterdam-Humanities-Labs/signlab_client_monitor_api@main#subdirectory=client"
 ```
-Nothing breaks if it is never installed: vendored `python_client.py` copies (byte-identical to `signlab_client_monitor/client.py`, refresh command in their header) sit next to the scripts and win on `sys.path`.
+Installing is optional. Vendored `python_client.py` copies sit next to the scripts and win on `sys.path`. They are byte-identical to `signlab_client_monitor/client.py`; the refresh command is in their header.
 
 ## Test
 ```bash
