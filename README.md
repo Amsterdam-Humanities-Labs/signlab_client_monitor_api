@@ -6,7 +6,7 @@ Registration and heartbeat API for SignCollect scripts and services, plus the `s
 - Status is computed on read from `last_seen`: online up to 1.5 x the interval, warning up to 2.0 x, else offline. These are the defaults; each client can have its own thresholds.
 - Clients can also submit metrics (CPU, I/O wait, disk, memory). They are kept 7 days and charted by the dashboard.
 - `api.php?action=<name>` routes requests; POST bodies are JSON. `src/ClientMonitorService.php` holds the logic (prepared statements). Responses are `{success, data, errors}`.
-- `client/` is the installable `signlab-client-monitor` package (`ClientMonitor`, `setup_rotating_logger`). See `client/README.md`.
+- `client/` is the installable `signlab-client-monitor` package: `ClientMonitor`, `setup_rotating_logger`, disk and mount checks, and `send_alert` (Discord, Mailjet). It imports without `requests`; sends then only log a warning. See `client/README.md`.
 - Auth ([stack#31](https://github.com/Amsterdam-Humanities-Labs/signlab_signcollect-stack/issues/31)): `register`, `heartbeat` and `submit_metrics` are open for machine clients. All other actions need the dashboard login (PHP session) and return 401 without it.
 
 | Action | Method | Parameters |
@@ -38,7 +38,7 @@ cd client && python3 -m pytest tests -q
 ## Configuration
 - `src/config.php` (not in git, no example) defines the database connection and `getDbConnection()`, `sendSuccess()`, `sendError()`.
 - `services/metrics_collector.py` hardcodes `API_URL` to the core server and needs `psutil`. It reports hourly as `server-<primary IP>`. Without the package it falls back to `examples/python_client.py`, a byte-identical copy of the package client.
-- `examples/` has PHP and bash clients. One shared PHP client under `client/` is planned ([stack#37](https://github.com/Amsterdam-Humanities-Labs/signlab_signcollect-stack/issues/37)).
+- `examples/` has a bash client. The PHP client in use is `php_client.php` in signlab_pythonCron (used by `mysql_backup.php`).
 
 ## Dependencies
 - MySQL `admin_gebarenoverleg`: `client_monitors`, `client_metrics`.

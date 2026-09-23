@@ -19,10 +19,10 @@ from datetime import datetime
 # see client/README.md. Once client/install.sh has run on a host, the first
 # branch is what runs.
 try:
-    from signlab_client_monitor import ClientMonitor
+    from signlab_client_monitor import ClientMonitor, disk_usage
 except ImportError:
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from examples.python_client import ClientMonitor
+    from examples.python_client import ClientMonitor, disk_usage
 
 # Configuration
 API_URL = "https://signcollect.nl/client_monitor_api/api.php"
@@ -70,11 +70,11 @@ class MetricsCollector:
             cpu_wait = getattr(cpu_times, 'iowait', None)
 
             # Disk usage for root partition
-            disk = psutil.disk_usage('/')
-            disk_percent = disk.percent
-            disk_total_gb = round(disk.total / (1024**3), 2)
-            disk_used_gb = round(disk.used / (1024**3), 2)
-            disk_free_gb = round(disk.free / (1024**3), 2)
+            disk = disk_usage('/')
+            disk_percent = round(disk['used_percent'], 1)  # psutil's percent
+            disk_total_gb = round(disk['total'] / (1024**3), 2)
+            disk_used_gb = round(disk['used'] / (1024**3), 2)
+            disk_free_gb = round(disk['free'] / (1024**3), 2)
 
             # Memory usage (optional)
             memory = psutil.virtual_memory()

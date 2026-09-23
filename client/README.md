@@ -16,9 +16,12 @@ except Exception as exc:
 ## Behaviour (fixed by `tests/`)
 - Signature: `(api_url, client_id, client_name, description, heartbeat_interval)`. Without `api_url` it uses the core server.
 - `register()` runs once, by itself, before the first heartbeat.
-- No call raises, and every call has a timeout. Methods return a `Response` dict that is falsy on failure.
+- No call raises, and every call has a timeout. Without `requests` installed it still imports; sends then only log a warning. Methods return a `Response` dict that is falsy on failure.
 - `from python_client import ClientMonitor` also resolves to this package, so old `sys.path` call sites keep working.
-- `logs.py` only re-exports `setup_rotating_logger` from `client.py`. That way `client.py` can be vendored as one file.
+- `logs.py`, `checks.py` and `alert.py` only re-export from `client.py`. That way `client.py` can be vendored as one file.
+- `disk_usage(path)` returns bytes as `df -B1` does, plus `free_percent` and `used_percent` (psutil's `percent`, not rounded). It raises if the path is unreadable.
+- `mount_responds(path)` runs `ls` with a 5 s timeout. `mount_read_write(mount, test_dir)` writes, reads back and deletes a file; it raises on failure.
+- `send_alert(title, msg, level, channels=("discord", "mailjet"))` reads credentials only from the environment: `DISCORD_WEBHOOK_URL`, or `DISCORD_BOT_TOKEN` + `DISCORD_CHANNEL_ID`; `MAILJET_API_KEY` + `MAILJET_SECRET_KEY`. Addresses come as arguments or from `ALERT_EMAIL_FROM`/`ALERT_EMAIL_TO`. It skips unconfigured channels and never raises.
 
 ## Install
 ```bash
