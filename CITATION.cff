@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "signlab_client_monitor_api: Heartbeat and metrics API for lab machines, plus the shared Python monitoring client"
+authors:
+  - given-names: Gomer
+    family-names: Otterspeer
+    affiliation: University of Amsterdam
+  - given-names: Berit
+    family-names: Janssen
+  - given-names: Stijn
+    name-particle: van
+    family-names: Hannen
+license: Apache-2.0
+repository-code: "https://github.com/Amsterdam-Humanities-Labs/signlab_client_monitor_api"
+doi: "10.21942/uva.33980317"
+keywords:
+  - "sign language"
+  - "NGT"
+  - "SignCollect"

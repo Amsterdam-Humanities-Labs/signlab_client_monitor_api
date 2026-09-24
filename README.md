@@ -45,3 +45,10 @@ cd client && python3 -m pytest tests -q
 - [signlab_client_monitor_dashboard](https://github.com/Amsterdam-Humanities-Labs/signlab_client_monitor_dashboard): the UI for this API.
 - Callers use the Python package, a vendored copy or inline PHP curl: [signlab_pythonCron](https://github.com/Amsterdam-Humanities-Labs/signlab_pythonCron) (`check_disk.py`, `rclone_monitor.py`, `sync_mocap_files.py`, vendored `python_client.py`), [signlab_viconSync](https://github.com/Amsterdam-Humanities-Labs/signlab_viconSync), [signlab_mocap](https://github.com/Amsterdam-Humanities-Labs/signlab_mocap), [signlab_drs-pipeline](https://github.com/Amsterdam-Humanities-Labs/signlab_drs-pipeline), [signlab_zinnen-annotation](https://github.com/Amsterdam-Humanities-Labs/signlab_zinnen-annotation), [signlab_patient-info](https://github.com/Amsterdam-Humanities-Labs/signlab_patient-info), [signlab_annotation-editors](https://github.com/Amsterdam-Humanities-Labs/signlab_annotation-editors).
 - Stack overview: [signlab_signcollect-stack](https://github.com/Amsterdam-Humanities-Labs/signlab_signcollect-stack).
+
+## License and citation
+
+Apache License 2.0, copyright University of Amsterdam: see [LICENSE](LICENSE) and
+[NOTICE](NOTICE). You may use it, also commercially, as long as you credit
+Gomer Otterspeer / University of Amsterdam as the source. To cite it, use
+[CITATION.cff](CITATION.cff) (the *Cite this repository* button on GitHub) or the DOI [10.21942/uva.33980317](https://doi.org/10.21942/uva.33980317).
